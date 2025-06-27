@@ -21,5 +21,5 @@ def generate(topic):
         model="llama-3.3-70b-versatile",
     )
     return chat_completion.choices[0].message.content
-topic=input("enter your topic")
-print(generate({topic}))
+# topic=input("enter your topic")
+# print(generate({topic}))
