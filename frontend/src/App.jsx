@@ -98,17 +98,16 @@ function App() {
           <div class="text-center mb-8">
             <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
               <span class="bg-gradient-to-r from-primary-400 to-secondary-400 bg-clip-text text-transparent">
-                Premium
+                Tweets Posts
               </span>{' '}
-              <span class="text-white">Posts</span>
             </h1>
             <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto">
-              Discover, create, and share amazing content with our premium platform
+              Discover, create, and share amazing tweet
             </p>
           </div>
 
           {/* Search and Stats */}
-          <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+          {/* <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             <SearchBar onSearch={handleSearch} />
             <div class="flex items-center gap-6 text-gray-300">
               <div class="text-center">
@@ -120,7 +119,7 @@ function App() {
                 <div class="text-sm">All Time</div>
               </div>
             </div>
-          </div>
+          </div> */}
         </header>
 
         {/* Main Content */}
