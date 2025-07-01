@@ -5,51 +5,57 @@ import SearchBar from './components/SearchBar';
 import Pagination from './components/Pagination';
 import CreatePostForm from './components/CreatePostForm';
 import { mockPosts } from './data/mockPosts';
+import { getAllTweets }  from './service/twitter_service';
+
 
 function App() {
-  const [posts, setPosts] = createSignal(mockPosts);
+  const [posts, setPosts] = createSignal([]);
+  const [posted, setPosted] = createSignal(undefined); // null / true / false
+  const [totalItems, setTotalItems] = createSignal(0);
+
+
   const [searchQuery, setSearchQuery] = createSignal('');
   const [currentPage, setCurrentPage] = createSignal(1);
   const itemsPerPage = 6;
 
   // Filter posts based on search query
-  const filteredPosts = createMemo(() => {
-    const query = searchQuery().toLowerCase();
-    if (!query) return posts();
+  // const filteredPosts = createMemo(() => {
+  //   const query = searchQuery().toLowerCase();
+  //   if (!query) return posts();
     
-    return posts().filter(post => 
-      post.title.toLowerCase().includes(query) ||
-      post.content.toLowerCase().includes(query) ||
-      post.category.toLowerCase().includes(query) ||
-      post.tags.some(tag => tag.toLowerCase().includes(query)) ||
-      post.author.toLowerCase().includes(query)
-    );
-  });
+  //   return posts().filter(post => 
+  //     post.title.toLowerCase().includes(query) ||
+  //     post.content.toLowerCase().includes(query) ||
+  //     post.category.toLowerCase().includes(query) ||
+  //     post.tags.some(tag => tag.toLowerCase().includes(query)) ||
+  //     post.author.toLowerCase().includes(query)
+  //   );
+  // });
 
   // Paginated posts
   const paginatedPosts = createMemo(() => {
-    const filtered = filteredPosts();
-    const startIndex = (currentPage() - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filtered.slice(startIndex, endIndex);
+    // const filtered = filteredPosts();
+    // const startIndex = (currentPage() - 1) * itemsPerPage;
+    // const endIndex = startIndex + itemsPerPage;
+    // return filtered.slice(startIndex, endIndex);
   });
 
   // Pagination state
   const paginationState = createMemo(() => {
-    const totalItems = filteredPosts().length;
+    const totalItems = posts().length; // Ideally use total from API
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    
     return {
       currentPage: currentPage(),
       totalPages,
-      itemsPerPage,
+      limit:itemsPerPage,
       totalItems
     };
   });
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1); 
+    fetchTweets(1)// Reset to first page when searching
   };
 
   const handlePageChange = (page) => {
@@ -73,15 +79,27 @@ function App() {
     
     setPosts([newPost, ...posts()]);
   };
+const fetchTweets = async (page = 1) => {
+  const limit = itemsPerPage;
+  const offset = (page - 1) * limit;
+
+  try {
+    const response = await getAllTweets(posted(), searchQuery(), limit, offset);
+    const data = response.data;
+    setTotalItems(data.total_items);
+    setPosts(data.items);
+    setCurrentPage(page);
+  } catch (err) {
+    console.error("Failed to fetch tweets", err);
+  }
+};
 
   // Reset current page when search results change
   onMount(() => {
     // Add some animation delays for initial load
-    const cards = document.querySelectorAll('.animate-fade-in');
-    cards.forEach((card, index) => {
-      card.style.animationDelay = `${index * 0.1}s`;
+      fetchTweets(1)
+      // card.style.animationDelay = `${index * 0.1}s`;
     });
-  });
 
   return (
     <div class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
@@ -107,19 +125,26 @@ function App() {
           </div>
 
           {/* Search and Stats */}
-          {/* <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             <SearchBar onSearch={handleSearch} />
             <div class="flex items-center gap-6 text-gray-300">
-              <div class="text-center">
+              <div class="flex gap-2 justify-center mb-4">
+  <button class="btn" onClick={() => { setPosted(undefined); fetchTweets(1); }}>All</button>
+  <button class="btn" onClick={() => { setPosted(true); fetchTweets(1); }}>Posted</button>
+  <button class="btn" onClick={() => { setPosted(false); fetchTweets(1); }}>Unposted</button>
+</div>
+
+
+              {/* <div class="text-center">
                 <div class="text-2xl font-bold text-white">{paginationState().totalItems}</div>
                 <div class="text-sm">Total Posts</div>
               </div>
               <div class="text-center">
                 <div class="text-2xl font-bold text-white">{posts().length}</div>
                 <div class="text-sm">All Time</div>
-              </div>
+              </div> */}
             </div>
-          </div> */}
+          </div>
         </header>
 
         {/* Main Content */}
@@ -129,13 +154,13 @@ function App() {
 
           {/* Posts Grid */}
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <For each={paginatedPosts()}>
+            <For each={posts()}>
               {(post) => <PostCard post={post} />}
             </For>
           </div>
 
           {/* Empty State */}
-          {filteredPosts().length === 0 && (
+          {posts().length === 0 && (
             <div class="text-center py-12">
               <div class="text-6xl mb-4">🔍</div>
               <h3 class="text-2xl font-semibold text-white mb-2">No posts found</h3>

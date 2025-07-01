@@ -13,6 +13,7 @@ export default function CreatePostForm(props) {
   const [isExpanded, setIsExpanded] = createSignal(false);
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal('');
+  const [success, setSuccess] = createSignal('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,11 +23,14 @@ export default function CreatePostForm(props) {
 
     setLoading(true);
     setError('');
+    setSuccess('');
     generatepost({"topic":title()}).then((responce)=>{
-      console.log(responce.data)
+      // console.log(responce.data)
+      setSuccess("Successfully post Generated !!")
     }).catch((error)=>{
-      console.log(error)
-    })
+      // console.log(error)
+      setError("Something problemetic Try some time later!!")
+    }).finally(()=>setLoading(false))
   };
   return (
     <div class="glass rounded-xl p-6 mb-8">
@@ -45,7 +49,7 @@ export default function CreatePostForm(props) {
 
         {isExpanded() && (
           <div class="space-y-4 animate-slide-up">
-            <div class="relative">
+            {/* <div class="relative">
               <textarea
                 value={content()}
                 onInput={(e) => setContent(e.target.value)}
@@ -53,7 +57,7 @@ export default function CreatePostForm(props) {
                 class="w-full px-4 py-3 bg-white/10 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:bg-white/20 transition-all duration-200 border border-white/20 resize-none"
                 readOnly
               />
-            </div>
+            </div> */}
 
 
             <div class="flex items-center gap-3">
@@ -75,6 +79,9 @@ export default function CreatePostForm(props) {
 
             {error() && (
               <p class="text-red-400 text-sm font-medium">{error()}</p>
+            )}
+            {success() && (
+              <p class="text-green-400 text-sm font-medium">{success()}</p>
             )}
           </div>
         )}

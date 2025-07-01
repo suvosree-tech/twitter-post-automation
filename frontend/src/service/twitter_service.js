@@ -16,9 +16,16 @@ export const posttweet = (id) => {
 };
 
 // 3. Get all tweets (with optional query parameters)
-export const getAllTweets = (params = {}) => {
+export const getAllTweets = (posted, search,limit,offset) => {
   // params can include: posted (true/false), search (string), limit, offset
-  return publicapi.get("/tweet/tweets", { params });
+  return publicapi.get("/tweet/tweets",{
+    params:{
+      limit:limit || 10 ,
+      offset:offset||0,
+      search:search,
+      posted:posted!== undefined ? posted : undefined
+    }
+});
 };
 
 // 4. Update a tweet by ID

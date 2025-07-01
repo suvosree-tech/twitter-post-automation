@@ -5,30 +5,50 @@
  */
 
 export default function Pagination(props) {
-  const getPageNumbers = () => {
-    const { currentPage, totalPages } = props.pagination;
-    const pages = [];
-    const maxVisiblePages = 5;
+  // const getPageNumbers = () => {
+  //   const { currentPage, totalPages } = props.pagination;
+  //   const pages = [];
+  //   const maxVisiblePages = 5;
     
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  //   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  //   let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
     
-    if (endPage - startPage < maxVisiblePages - 1) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
+  //   if (endPage - startPage < maxVisiblePages - 1) {
+  //     startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  //   }
     
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
+  //   for (let i = startPage; i <= endPage; i++) {
+  //     pages.push(i);
+  //   }
     
-    return pages;
-  };
+  //   return pages;
+  // };
+  const [pagination, setPagination] = createSignal({
+  currentPage: 1,
+  totalPages: 1,
+  limit: 10
+});
+const [tweets, setTweets] = createSignal([]);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= props.pagination.totalPages) {
       props.onPageChange(page);
     }
   };
+  const fetchTweets = async (page = 1) => {
+  const limit = pagination().limit;
+  const offset = (page - 1) * limit;
+
+  const response = await getAllTweets(/* posted */ undefined, /* search */ "", limit, offset);
+  const data = response.data;
+
+  setTweets(data.items);
+  setPagination(p => ({
+    ...p,
+    currentPage: page,
+    totalPages: Math.ceil(data.total_items / limit)
+  }));
+};
 
   return (
     <div class="flex items-center justify-center gap-2 mt-8">
