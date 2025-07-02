@@ -1,7 +1,7 @@
 import traceback
 from sqlmodel import create_engine,Session,SQLModel
 from typing import Annotated
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from src.config import DATABASE
 engine=create_engine(DATABASE)
 def create_table():
