@@ -20,9 +20,10 @@ app=FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://twitter-post-automation.vercel.app/"
+        "https://twitter-post-automation.vercel.app"
         # "http://localhost:5173",
-    ],
+        # "https://twitter-post-automation.vercel.app/"
+        ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
