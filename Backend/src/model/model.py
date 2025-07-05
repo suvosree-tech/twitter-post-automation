@@ -13,6 +13,7 @@ class TweetOut(BaseModel):
     topic: str
     content: str
     posted: bool
+    image_path:str | None=None
 class Pagable_responce(BaseModel):
     items:List[TweetOut]
     total_items:int 

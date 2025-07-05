@@ -7,3 +7,4 @@ class Tweet(SQLModel,table=True):
     content:str
     topic:str
     posted:bool=False
+    image_path:Optional[str]=Field(default=None)

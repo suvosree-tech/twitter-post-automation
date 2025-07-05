@@ -1,5 +1,7 @@
+import os
+from pathlib import Path
 import traceback
-from src.services.ai_service import generate 
+from src.services.ai_service import generate,generate_image
 from src.schemas.schema import Tweet
 from src.db import getdb
 from fastapi import HTTPException
@@ -9,6 +11,7 @@ from sqlalchemy import or_
 from math import ceil
 from src.config import TWEETER_API_KEY,TWEETER_API_URL
 import requests 
+
 
 
 
@@ -108,5 +111,50 @@ def posttweet(id,db):
     except:
         traceback.print_exc()
         raise HTTPException(status_code=500,detail="Something problemetic , try after some times")
-
-    
+def get_generate_image(twitterid:int,db):
+    if not twitterid:
+        raise HTTPException(status_code=400,detail="Twitter id is required")
+    try:
+        tweet=db.exec(select(Tweet).where(Tweet.id == twitterid)).first()
+        if not tweet:
+                raise HTTPException(status_code=404, detail="Tweet not found")
+        if not tweet.image_path:
+                raise HTTPException(status_code=404, detail="No image generated for this tweet") 
+        image_path = tweet.image_path
+        if not image_path:
+                image_path = generate_image(tweet.topic)
+        else:
+            if not Path(image_path).exists():
+                    image_path = generate_image(tweet.topic)
+            else:
+                    os.remove(image_path)  # Remove old image if it exists
+                    image_path = generate_image(tweet.topic)  
+            if not image_path:
+                raise HTTPException(status_code=500, detail="Failed to generate image")
+                    
+            tweet.image_path = image_path
+            db.add(tweet)
+            db.commit()
+            db.refresh(tweet)
+            image_path = tweet.image_path
+            return {
+                "image_path": image_path,
+                "tweet_id": twitterid
+            }
+    except Exception as e:
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"An error occurred while fetching the image: {str(e)}")
+def get_singletweet(tweeterid:int,db):
+     if not tweeterid:
+            raise HTTPException(status_code=400, detail="Tweet ID is required")
+     try:
+            tweet = db.exec(select(Tweet).where(Tweet.id == tweeterid)).first()
+            if not tweet:
+                raise HTTPException(status_code=404, detail="Tweet not found")
+            return tweet
+        
+     except Exception as e:
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"An error occurred while fetching the tweet: {str(e)}")
+      
+            
